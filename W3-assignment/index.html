@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/styles.css">
+
+</head>
+<body>
+    <table>
+        <tr><th>Search Widget</th></tr>
+        <tr>
+            <td>
+                <form  id="search-box">
+                    <!-- <div id="search-box"> -->
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="myInput" autocomplete="off" tabindex="1">
+                    <button class="reset-btn" tabindex="2">&#215;</button>
+                    <!-- </div> -->
+                </form>
+            </td>
+        </tr>
+    </table>
+    
+
+    <script>
+        function findMatch(myInput, data) {
+            var currentFocus;
+            var btn = document.querySelector(".reset-btn");
+            /*execute a function when someone writes in the text field:*/
+            myInput.addEventListener("input", function (e) {
+                let a;
+                let b;
+                let val = this.value;
+                btn.classList.add("show");
+                closeAllLists();
+                if (!val) { return false; }
+                currentFocus = -1;
+                // Create a div element to hold match items
+                a = document.createElement("DIV");
+                a.setAttribute("id", "match-list");
+                a.setAttribute("class", "match-items");
+                a.setAttribute("tabindex", "3");
+
+                this.parentNode.appendChild(a);
+
+                for (let i = 0; i < data.length; i++) {
+                    let fIndex = data[i].indexOf(val.toLowerCase())
+                    if (fIndex >= 0) {
+                        //create div element to hold single match item
+                        b = document.createElement("DIV");
+                        b.innerHTML += data[i].substr(0, fIndex)
+                        b.innerHTML += "<b>" + data[i].substr(fIndex, val.length) + "</b>"
+                        b.innerHTML += data[i].substr(fIndex + val.length)
+                        /*insert a input field that will hold the current array item's value:*/
+                        b.innerHTML += "<input type='hidden' value='" + data[i] + "'>";
+                        /*execute a function when someone clicks on the item value (DIV element):*/
+                        b.addEventListener("click", function (e) {
+                            /*insert the value for the autocomplete text field:*/
+                            myInput.value = this.getElementsByTagName("input")[0].value;
+                            /*close the list of autocompleted values,or any other open lists of autocompleted values:*/
+                            closeAllLists();
+                        });
+                        a.appendChild(b);
+                    }
+                }
+            });
+
+            /*execute a function presses a key on the keyboard:*/
+            myInput.addEventListener("keydown", e => {
+                var x = document.getElementById("match-list");
+                if (x) x = x.getElementsByTagName("div");
+                if (e.keyCode == 40) {
+                    /*If the arrow DOWN key is pressed,increase the currentFocus variable:*/
+                    currentFocus++;
+                    /*and make the current item more visible:*/
+                    addActive(x);
+                } else if (e.keyCode == 38) {
+                    /*If the arrow UP key is pressed,decrease the currentFocus variable:*/
+                    currentFocus--;
+                    /*and and make the current item more visible:*/
+                    addActive(x);
+                } else if (e.keyCode == 13) {
+                    /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                    e.preventDefault();
+                    if (currentFocus > -1) {
+                        /*and simulate a click on the "active" item:*/
+                        if (x) x[currentFocus].click();
+                    }
+                }
+            });
+
+            // when someone click on ESC
+            document.querySelector('form').addEventListener("keydown", e => {
+                if (e.keyCode == 27) {
+                    if (e.target.contains(document.activeElement) && document.activeElement != myInput) {
+                        //if focus is not on input field when click on ESC, move the focus on input
+                        myInput.focus();
+                    } else {
+                        // focus is on input field, clear the input, and hide the reset button
+                        myInput.value = "";
+                        btn.classList.remove("show");
+                    }
+                    closeAllLists();;
+                }
+            });
+
+            function addActive(x) {
+                /*a function to classify an item as "active":*/
+                if (!x) return false;
+                /*start by removing the "active" class on all items:*/
+                removeActive(x);
+                if (currentFocus >= x.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = (x.length - 1);
+                /*add class "autocomplete-active":*/
+                x[currentFocus].classList.add("item-active");
+                x[currentFocus].scrollIntoView(false);
+            }
+            function removeActive(x) {
+                /*a function to remove the "active" class from all autocomplete items:*/
+                for (var i = 0; i < x.length; i++) {
+                    x[i].classList.remove("item-active");
+                }
+            }
+
+            function closeAllLists(elmnt) {
+                /*close all autocomplete lists in the document, except the one passed as an argument:*/
+                var x = document.getElementsByClassName("match-items");
+                for (var i = 0; i < x.length; i++) {
+                    if (elmnt != x[i] && elmnt != myInput) {
+                        x[i].parentNode.removeChild(x[i]);
+                    }
+                }
+            }
+            // execute a function when someone click on the reset button
+            btn.addEventListener("click", e => {
+                e.preventDefault();
+                closeAllLists();
+                myInput.value = "";
+                myInput.focus();
+                btn.classList.remove("show");
+            });
+
+            /*execute a function when someone clicks in the document:*/
+            document.addEventListener("click", e => {
+                closeAllLists(e.target);
+            });
+        }
+
+        var data = ["student on the bus", "useless stuff", "stubhub tickets", "unusual", "user study", " english teacher", "long distant", "search widget", "monkeyking", "make american great again", "working in progress", "passion fruit", "forget the past", "led", "global warming effect", "former president", "keep going", "soft landing", "interest", "darkness", "mapkit", "declared war", "young generations", "jump ahead", "shall", "modern design", "piece of cake", "any circumstances", "rough journey", "breath subtlely", "grade", "bank association", "zero", "go ahead", "strong woman", "biscuit basket", "slabs", "western logic thinking", "keep fighting", "xbox series x", "sell and buy", "smaller than nothing", "beside", "vehicle garage", "jack in the box", " good mood", "stock dropped", "energy man", "dog", "pacific ocean", "rubbed", "trunk", "glass", "window", "xfinity phone number", "wake me up in the first day of september morning", "successful launching", "including", "look out", "put together", "US army", "zillow estate", "season flu", "respect and love", "characteristic", "writing a letter", "grey goose", "load", "fought forever", "summer last", "feathers fade away", "equal right"];
+
+        // call the main function
+        findMatch(document.getElementById("myInput"), data);
+
+    </script>
+
+</body>
+
+
+</html>
